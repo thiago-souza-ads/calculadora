@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  calculadora:
+    image: calculadora:latest
+    build: .
+    networks:
+      - network_public
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.calculadora.rule=Host(`calculadora.nextagent.com.br`)"
+        - "traefik.http.routers.calculadora.entrypoints=websecure"
+        - "traefik.http.routers.calculadora.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.calculadora.loadbalancer.server.port=80"
+        - "traefik.http.routers.calculadora-http.rule=Host(`calculadora.nextagent.com.br`)"
+        - "traefik.http.routers.calculadora-http.entrypoints=web"
+
+networks:
+  network_public:
+    external: true

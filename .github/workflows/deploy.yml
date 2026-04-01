@@ -1,0 +1,86 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: 🔍 Testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm test -- --run
+
+  build-and-deploy:
+    name: 🚀 Build & Deploy
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t calculadora:latest .
+
+      - name: Save Docker image
+        run: docker save calculadora:latest | gzip > calculadora.tar.gz
+
+      - name: Copy image to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "calculadora.tar.gz"
+          target: "/tmp"
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /tmp
+            docker load -i calculadora.tar.gz
+            rm calculadora.tar.gz
+
+            # Cria arquivo compose temporário para deploy
+            cat > /tmp/calculadora-stack.yml << 'EOF'
+            version: "3.8"
+
+            services:
+              calculadora:
+                image: calculadora:latest
+                networks:
+                  - network_public
+                deploy:
+                  mode: replicated
+                  replicas: 1
+                  update_config:
+                    parallelism: 1
+                    delay: 10s
+                    order: start-first
+                  labels:
+                    - "traefik.enable=true"
+                    - "traefik.http.routers.calculadora.rule=Host(`calculadora.nextagent.com.br`)"
+                    - "traefik.http.routers.calculadora.entrypoints=websecure"
+                    - "traefik.http.routers.calculadora.tls.certresolver=letsencryptresolver"
+                    - "traefik.http.services.calculadora.loadbalancer.server.port=80"
+                    - "traefik.http.routers.calculadora-http.rule=Host(`calculadora.nextagent.com.br`)"
+                    - "traefik.http.routers.calculadora-http.entrypoints=web"
+
+            networks:
+              network_public:
+                external: true
+            EOF
+
+            docker stack deploy -c /tmp/calculadora-stack.yml calculadora
+            rm /tmp/calculadora-stack.yml
