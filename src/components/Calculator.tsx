@@ -6,6 +6,7 @@ import type { Operator } from '../types';
 export function Calculator() {
   const {
     display,
+    state,
     addDigit,
     addDecimal,
     chooseOperation,
@@ -13,6 +14,11 @@ export function Calculator() {
     clear,
     deleteDigit,
     toggleSign,
+    memoryClear,
+    memoryRecall,
+    memoryAdd,
+    memorySubtract,
+    memoryStore,
   } = useCalculator();
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -26,6 +32,8 @@ export function Calculator() {
     else if (e.key === 'Backspace') deleteDigit();
   };
 
+  const hasMemory = state.memory !== 0;
+
   return (
     <div
       className="w-full max-w-sm mx-auto rounded-2xl shadow-2xl overflow-hidden bg-gray-800 border border-gray-700"
@@ -33,6 +41,49 @@ export function Calculator() {
       onKeyDown={handleKeyDown}
     >
       <Display display={display} />
+
+      {/* Indicador de memória */}
+      {hasMemory && (
+        <div className="text-right text-amber-400 text-[10px] px-6 -mt-1 mb-1 font-mono">
+          M
+        </div>
+      )}
+
+      {/* Botões de memória */}
+      <div className="grid grid-cols-5 gap-1 px-3 pb-1">
+        <button
+          onClick={memoryClear}
+          className={`text-xs h-8 rounded-lg transition-all ${hasMemory ? 'text-white hover:bg-gray-600' : 'text-gray-600'} cursor-pointer`}
+          disabled={!hasMemory}
+        >
+          MC
+        </button>
+        <button
+          onClick={memoryRecall}
+          className={`text-xs h-8 rounded-lg transition-all ${hasMemory ? 'text-white hover:bg-gray-600' : 'text-gray-600'} cursor-pointer`}
+          disabled={!hasMemory}
+        >
+          MR
+        </button>
+        <button
+          onClick={memoryAdd}
+          className="text-xs h-8 rounded-lg text-white hover:bg-gray-600 transition-all cursor-pointer"
+        >
+          M+
+        </button>
+        <button
+          onClick={memorySubtract}
+          className="text-xs h-8 rounded-lg text-white hover:bg-gray-600 transition-all cursor-pointer"
+        >
+          M−
+        </button>
+        <button
+          onClick={memoryStore}
+          className="text-xs h-8 rounded-lg text-white hover:bg-gray-600 transition-all cursor-pointer"
+        >
+          MS
+        </button>
+      </div>
 
       <div className="grid grid-cols-4 gap-1 p-3 bg-gray-800">
         {/* Linha 1 - Funções */}

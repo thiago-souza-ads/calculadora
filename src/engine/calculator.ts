@@ -5,6 +5,7 @@ export const INITIAL_STATE: CalculatorState = {
   previousOperand: '',
   operation: null,
   overwrite: false,
+  memory: 0,
 };
 
 export function evaluate(previousOperand: string, currentOperand: string, operation: Operator): string {
@@ -142,6 +143,34 @@ export function calculatorReducer(state: CalculatorState, action: CalculatorActi
         return { ...state, currentOperand: state.currentOperand.slice(1) };
       }
       return { ...state, currentOperand: `-${state.currentOperand}` };
+    }
+
+    case 'MEMORY_CLEAR':
+      return { ...state, memory: 0 };
+
+    case 'MEMORY_RECALL':
+      return {
+        ...state,
+        currentOperand: state.memory === 0 ? '0' : parseFloat(state.memory.toPrecision(12)).toString(),
+        overwrite: true,
+      };
+
+    case 'MEMORY_ADD': {
+      const valAdd = parseFloat(state.currentOperand);
+      if (isNaN(valAdd)) return state;
+      return { ...state, memory: state.memory + valAdd, overwrite: true };
+    }
+
+    case 'MEMORY_SUBTRACT': {
+      const valSub = parseFloat(state.currentOperand);
+      if (isNaN(valSub)) return state;
+      return { ...state, memory: state.memory - valSub, overwrite: true };
+    }
+
+    case 'MEMORY_STORE': {
+      const valStore = parseFloat(state.currentOperand);
+      if (isNaN(valStore)) return state;
+      return { ...state, memory: valStore, overwrite: true };
     }
 
     default:

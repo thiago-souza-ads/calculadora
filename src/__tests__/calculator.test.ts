@@ -142,3 +142,46 @@ describe('calculatorReducer', () => {
     expect(state.operation).toBe('*');
   });
 });
+
+describe('memória', () => {
+  it('MS armazena valor na memória', () => {
+    const initial = { ...INITIAL_STATE, currentOperand: '42' };
+    const state = calculatorReducer(initial, { type: 'MEMORY_STORE' });
+    expect(state.memory).toBe(42);
+  });
+
+  it('MR recupera valor da memória', () => {
+    const initial = { ...INITIAL_STATE, memory: 42 };
+    const state = calculatorReducer(initial, { type: 'MEMORY_RECALL' });
+    expect(state.currentOperand).toBe('42');
+  });
+
+  it('MC limpa a memória', () => {
+    const initial = { ...INITIAL_STATE, memory: 42 };
+    const state = calculatorReducer(initial, { type: 'MEMORY_CLEAR' });
+    expect(state.memory).toBe(0);
+  });
+
+  it('M+ soma ao valor da memória', () => {
+    const initial = { ...INITIAL_STATE, currentOperand: '10', memory: 30 };
+    const state = calculatorReducer(initial, { type: 'MEMORY_ADD' });
+    expect(state.memory).toBe(40);
+  });
+
+  it('M- subtrai do valor da memória', () => {
+    const initial = { ...INITIAL_STATE, currentOperand: '10', memory: 30 };
+    const state = calculatorReducer(initial, { type: 'MEMORY_SUBTRACT' });
+    expect(state.memory).toBe(20);
+  });
+
+  it('MR retorna 0 quando memória está vazia', () => {
+    const state = calculatorReducer(INITIAL_STATE, { type: 'MEMORY_RECALL' });
+    expect(state.currentOperand).toBe('0');
+  });
+
+  it('M+ funciona com memória vazia', () => {
+    const initial = { ...INITIAL_STATE, currentOperand: '25' };
+    const state = calculatorReducer(initial, { type: 'MEMORY_ADD' });
+    expect(state.memory).toBe(25);
+  });
+});

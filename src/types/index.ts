@@ -9,13 +9,19 @@ export type CalculatorAction =
   | { type: 'CLEAR' }
   | { type: 'DELETE_DIGIT' }
   | { type: 'TOGGLE_SIGN' }
-  | { type: 'ADD_DECIMAL' };
+  | { type: 'ADD_DECIMAL' }
+  | { type: 'MEMORY_CLEAR' }
+  | { type: 'MEMORY_RECALL' }
+  | { type: 'MEMORY_ADD' }
+  | { type: 'MEMORY_SUBTRACT' }
+  | { type: 'MEMORY_STORE' };
 
 export interface CalculatorState {
   currentOperand: string;
   previousOperand: string;
   operation: Operator | null;
   overwrite: boolean;
+  memory: number;
 }
 
 export interface CalculatorDisplay {

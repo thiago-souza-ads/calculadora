@@ -33,6 +33,26 @@ export function useCalculator() {
     dispatch({ type: 'TOGGLE_SIGN' });
   }, []);
 
+  const memoryClear = useCallback(() => {
+    dispatch({ type: 'MEMORY_CLEAR' });
+  }, []);
+
+  const memoryRecall = useCallback(() => {
+    dispatch({ type: 'MEMORY_RECALL' });
+  }, []);
+
+  const memoryAdd = useCallback(() => {
+    dispatch({ type: 'MEMORY_ADD' });
+  }, []);
+
+  const memorySubtract = useCallback(() => {
+    dispatch({ type: 'MEMORY_SUBTRACT' });
+  }, []);
+
+  const memoryStore = useCallback(() => {
+    dispatch({ type: 'MEMORY_STORE' });
+  }, []);
+
   const display: CalculatorDisplay = {
     current: formatOperand(state.currentOperand),
     previous: formatOperand(state.previousOperand),
@@ -49,5 +69,10 @@ export function useCalculator() {
     clear,
     deleteDigit,
     toggleSign,
+    memoryClear,
+    memoryRecall,
+    memoryAdd,
+    memorySubtract,
+    memoryStore,
   };
 }
