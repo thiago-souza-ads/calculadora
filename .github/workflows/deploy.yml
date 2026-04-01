@@ -81,4 +81,5 @@ jobs:
 
             docker stack deploy -c /tmp/calculadora-stack.yml calculadora
             rm /tmp/calculadora-stack.yml
+            docker service update --force calculadora_calculadora
           EOF
