@@ -32,28 +32,25 @@ jobs:
       - name: Save Docker image
         run: docker save calculadora:latest | gzip > calculadora.tar.gz
 
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
       - name: Copy image to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "calculadora.tar.gz"
-          target: "/tmp"
+        run: |
+          scp -i ~/.ssh/deploy_key calculadora.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
 
       - name: Deploy to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd /tmp
             docker load -i calculadora.tar.gz
             rm calculadora.tar.gz
 
-            # Cria arquivo compose temporário para deploy
-            cat > /tmp/calculadora-stack.yml << 'EOF'
+            cat > /tmp/calculadora-stack.yml << 'COMPOSE'
             version: "3.8"
 
             services:
@@ -80,7 +77,8 @@ jobs:
             networks:
               network_public:
                 external: true
-            EOF
+            COMPOSE
 
             docker stack deploy -c /tmp/calculadora-stack.yml calculadora
             rm /tmp/calculadora-stack.yml
+          EOF
