@@ -115,6 +115,7 @@ export function calculatorReducer(state: CalculatorState, action: CalculatorActi
 
       const result = evaluate(state.previousOperand, state.currentOperand, state.operation);
       return {
+        ...state,
         currentOperand: result,
         previousOperand: '',
         operation: null,
