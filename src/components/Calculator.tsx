@@ -70,7 +70,7 @@ export function Calculator() {
         Pressione as teclas do teclado para operar
       </div>
       <div className="text-center text-gray-500 text-[10px] pb-3">
-        Direitos reservados NextAgent
+        Direitos reservados NextAge
       </div>
     </div>
   );
