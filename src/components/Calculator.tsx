@@ -69,6 +69,9 @@ export function Calculator() {
       <div className="text-center text-gray-600 text-xs pb-2">
         Pressione as teclas do teclado para operar
       </div>
+      <div className="text-center text-gray-500 text-[10px] pb-3">
+        Direitos reservados NextAgent
+      </div>
     </div>
   );
 }
